@@ -16,7 +16,7 @@ contract MasterRegister {
     }
 
     modifier onlyUser() {
-        require(masterContract.getUserName(msg.sender) != "", "You need to create a user first.");
+        require(bytes(masterContract.getUserName(msg.sender)).length == 0, "You need to create a user first.");
         _;
     }
 
@@ -25,28 +25,14 @@ contract MasterRegister {
     ) external onlyUser {
         Register register = Register(contractAddress);
 
-        try {
-            register.setInfo("[MasterRegister] Validating Register contract.");
-            register.getInfo();
-        } catch {
-            revert("This is not a Register contract.");
-        }
-
-        try {
-            masterContract.updateStepByIndex(msg.sender, INDEX, NAME, contractAddress, false);
-        } catch {
-            revert("You already completed this step.");
-        }
+        register.setInfo("[MasterRegister] Validating Register contract.");
+        register.getInfo();
+        masterContract.updateStepByIndex(msg.sender, INDEX, NAME, contractAddress, false);
     }
 
-    function deployEasyWay(string message) external onlyUser {
+    function deployEasyWay(string memory message) external onlyUser {
         Register register = new Register();
         register.setInfo(message);
-
-        try {
-            masterContract.updateStepByIndex(msg.sender, INDEX, NAME, address(register), true);
-        } catch {
-            revert("You already completed this step.");
-        }
+        masterContract.updateStepByIndex(msg.sender, INDEX, NAME, address(register), true);
     }   
 }
